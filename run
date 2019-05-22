@@ -1,0 +1,8 @@
+#!/bin/bash
+
+killall lxpanel
+
+
+python3 Aqua.py
+
+exit 0
