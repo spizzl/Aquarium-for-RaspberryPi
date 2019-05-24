@@ -112,17 +112,17 @@ class Fish():
         self.fishr = Object("fishr.png")
         self.posx = 53
         self.posy = 23
-        self.estimatedcord = [0, 0]
+        self.estimatedcords = []
         reacting = [0, 0, 5, 10, 12, 20, 21, 21, 25, 30, 37, 44, 44, 49, 63, 112, -1, -1, -1]
-        self.arrived = False
-        self.curve = []
+        self.freeze = True
         self.speed = 1
         self.speedx = 0
-        self.speedy = 0
         self.dir = 'l'
+        self.speedy = 0
 
     def tab(self, mouse):
         self.calc(mouse)
+        self.freeze = False
         #53
         #23
 
@@ -131,18 +131,24 @@ class Fish():
         self.posy += self.speedy
 
     def clock(self):
-
-        self.move()
         if self.dir == 'l':
             self.fishl.place(self.posx, self.posy)
         else:
             self.fishr.place(self.posx, self.posy)
 
+        if not self.freeze:
+            self.move()
+            if math.ceil(self.calcdist()[0]) == 0: self.freeze = True
+
+    def calcdist(self):
+        distx = self.estimatedcords[0]-(self.posx+45)#Actual Center
+        disty = self.estimatedcords[1]-(self.posy+23)
+        return (distx, disty)
+
+
     def calc(self, cords):
-
-        distx = cords[0]-(self.posx+45)#Actual Center
-        disty = cords[1]-(self.posy+23)
-
+        self.estimatedcords = cords
+        distx, disty = self.calcdist()
         rads = math.atan2(distx, disty)
         rads %= 2*math.pi
         degs = math.ceil(math.degrees(rads))
