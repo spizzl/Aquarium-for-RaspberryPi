@@ -1,7 +1,7 @@
 import pygame
 import sys
-import math
-
+from math import ceil, sin, cos, atan2, degrees, pi
+from random import choice
 class Aquarium():
 
     def __init__(self):
@@ -113,16 +113,19 @@ class Fish():
         self.posx = 53
         self.posy = 23
         self.estimatedcords = []
-        reacting = [0, 0, 5, 10, 12, 20, 21, 21, 25, 30, 37, 44, 44, 49, 63, 112, -1, -1, -1]
         self.freeze = True
         self.speed = 1
         self.speedx = 0
-        self.dir = 'l'
         self.speedy = 0
+        self.dir = 'l'
+        self.wait = -1
 
     def tab(self, mouse):
         self.calc(mouse)
         self.freeze = False
+        reacting = [0, 0, 10, 20, 21, 25, 30, 37, 44, 44, 49, 57, 63, 79, 92, 94, 96, 112, 150, 212, 380, -1, -1]
+        self.wait = choice(reacting)
+
         #53
         #23
 
@@ -131,14 +134,19 @@ class Fish():
         self.posy += self.speedy
 
     def clock(self):
+
+
         if self.dir == 'l':
             self.fishl.place(self.posx, self.posy)
         else:
             self.fishr.place(self.posx, self.posy)
 
-        if not self.freeze:
+
+        if self.wait is not 0:
+            self.wait -= 1
+        elif not self.freeze:
             self.move()
-            if math.ceil(self.calcdist()[0]) == 0: self.freeze = True
+            if ceil(self.calcdist()[0]) == 0: self.freeze = True
 
     def calcdist(self):
         distx = self.estimatedcords[0]-(self.posx+45)#Actual Center
@@ -149,11 +157,11 @@ class Fish():
     def calc(self, cords):
         self.estimatedcords = cords
         distx, disty = self.calcdist()
-        rads = math.atan2(distx, disty)
-        rads %= 2*math.pi
-        degs = math.ceil(math.degrees(rads))
-        self.speedx = math.sin(rads) * self.speed
-        self.speedy = math.cos(rads) * self.speed
+        rads = atan2(distx, disty)
+        rads %= 2*pi
+        degs = ceil(degrees(rads))
+        self.speedx = sin(rads) * self.speed
+        self.speedy = cos(rads) * self.speed
 
         if degs <= 180:
             self.dir = 'r'
