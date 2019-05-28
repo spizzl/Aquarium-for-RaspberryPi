@@ -11,7 +11,8 @@ class Aquarium():
         pygame.key.set_repeat(1, 30)
         self.clock = MainClock()
         self.run_state = True
-        self.backgroud1 = Object("back1_small.ppm")
+        self.backgrounds = [Object("back1_small.ppm"), Object("back2_small.ppm"), Object("back3_small.ppm")]
+        self.background = self.backgrounds[0]
         self.thomas = Fish()
         self.bubbles = []
         self.food = []
@@ -21,8 +22,8 @@ class Aquarium():
         while self.run_state:
             self.clock.tick()
             self.EventHandling()
-            self.backgroud.place()
-
+            self.background.place()
+            
             for f in self.food:
                 f.clock()
 
@@ -49,6 +50,14 @@ class Aquarium():
             if e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_ESCAPE:
                     pygame.event.post(pygame.event.Event(pygame.QUIT))
+                elif e.key == pygame.K_1:
+                    self.background = self.backgrounds[0]
+                elif e.key == pygame.K_2:
+                    self.background = self.backgrounds[1]
+                elif e.key == pygame.K_3:
+                    self.background = self.backgrounds[2]
+
+
 
 class MainClock():
     def __init__(self):
