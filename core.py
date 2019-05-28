@@ -1,7 +1,7 @@
 import pygame
 import sys
 from math import ceil, sin, cos, atan2, degrees, pi
-from random import choice
+from random import choice, randrange
 class Aquarium():
 
     def __init__(self):
@@ -11,9 +11,10 @@ class Aquarium():
         pygame.key.set_repeat(1, 30)
         self.clock = MainClock()
         self.run_state = True
-        self.backgroud = Object("back1_small.ppm")
+        self.backgroud1 = Object("back1_small.ppm")
         self.thomas = Fish()
         self.bubbles = []
+        self.food = []
 
     def MainLoop(self):
         x = 1
@@ -21,12 +22,16 @@ class Aquarium():
             self.clock.tick()
             self.EventHandling()
             self.backgroud.place()
+
+            for f in self.food:
+                f.clock()
+
             for b in self.bubbles:
                 if b.visible:
                     b.clock()
                 else:
                     b = None
-            self.thomas.clock()
+            self.thomas.clock(self.food)
             self.screen.load()
     def EventHandling(self):
         #-------ESCAPE EVENT Handling
@@ -34,8 +39,13 @@ class Aquarium():
             if e.type == pygame.QUIT:
                 self.run_state = False
             if e.type == pygame.MOUSEBUTTONUP:
-                self.thomas.tab(pygame.mouse.get_pos())
-                self.bubbles.append(Bubbles(self.thomas.posx, self.thomas.posy, self.thomas.dir))
+                if e.button == 1:
+                    self.thomas.tab(pygame.mouse.get_pos())
+                    self.bubbles.append(Bubbles(self.thomas.posx, self.thomas.posy, self.thomas.dir))
+                elif e.button == 3:
+                    self.food.append(FishFood(pygame.mouse.get_pos()[0]))
+                else:
+                    pass
             if e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_ESCAPE:
                     pygame.event.post(pygame.event.Event(pygame.QUIT))
@@ -100,21 +110,38 @@ class Bubbles():
     def moveup(self):
         if self.y != None:
             self.y -= 3
-        elif self.y <= 0:
+        if self.y <= -50:
             self.visible = False
     def clock(self):
         self.moveup()
         self.image.place(self.x, self.y)
 
+
+class FishFood():
+
+    def __init__(self, x):
+        self.x = x
+        self.y = 0
+        self.image = Object("food{}.png".format(randrange(1, 5)))
+
+    def clock(self):
+        if self.y < 303:
+            self.y += 1
+            self.image.place(self.x, self.y)
+            return True
+        else:
+            self.image.place(self.x, self.y)
+        return False
+
+
 class Fish():
     def __init__(self):
-        self.fishl = Object("fishl.png")
-        self.fishr = Object("fishr.png")
+        self.imageL = Object("fishl.png")
+        self.imageR = Object("fishr.png")
         self.posx = 53
         self.posy = 23
         self.estimatedcords = []
         self.freeze = True
-        self.speed = 1
         self.speedx = 0
         self.speedy = 0
         self.dir = 'l'
@@ -122,10 +149,10 @@ class Fish():
 
     def tab(self, mouse):
         self.calc(mouse)
+        if self.freeze:
+            reacting = [0, 0, 10, 20, 21, 25, 30, 37, 44, 44, 49, 57, 63, 79, 92, 94, 96, 112, 150, 212, 380, -1, -1]
+            self.wait = choice(reacting)
         self.freeze = False
-        reacting = [0, 0, 10, 20, 21, 25, 30, 37, 44, 44, 49, 57, 63, 79, 92, 94, 96, 112, 150, 212, 380, -1, -1]
-        self.wait = choice(reacting)
-
         #53
         #23
 
@@ -133,35 +160,49 @@ class Fish():
         self.posx += self.speedx
         self.posy += self.speedy
 
-    def clock(self):
+    def clock(self, food):
 
+
+
+
+        if len(food) is not 0:
+            self.calc((food[0].x, food[0].y), 2)
+            if ceil(self.calcdist(food[0].x, food[0].y)[0]) == 0: food.pop(0)
+            self.move()
+
+        if not self.freeze:
+            if self.wait is not 0:
+                self.wait -= 1
+            else:
+                if ceil(self.calcdist(self.estimatedcords[0], self.estimatedcords[1])[0]) == 0: self.freeze = True
+                self.move()
+        else:
+            pass
 
         if self.dir == 'l':
-            self.fishl.place(self.posx, self.posy)
+            self.imageL.place(self.posx, self.posy)
         else:
-            self.fishr.place(self.posx, self.posy)
+            self.imageR.place(self.posx, self.posy)
 
 
-        if self.wait is not 0:
-            self.wait -= 1
-        elif not self.freeze:
-            self.move()
-            if ceil(self.calcdist()[0]) == 0: self.freeze = True
 
-    def calcdist(self):
-        distx = self.estimatedcords[0]-(self.posx+45)#Actual Center
-        disty = self.estimatedcords[1]-(self.posy+23)
+
+    def calcdist(self, x, y):
+
+        offsetx = 10 if self.dir == 'l' else 90
+        distx = x-(self.posx+offsetx)#Actual Center
+        disty = y-(self.posy+23)
         return (distx, disty)
 
 
-    def calc(self, cords):
+    def calc(self, cords, speed=1):
         self.estimatedcords = cords
-        distx, disty = self.calcdist()
+        distx, disty = self.calcdist(self.estimatedcords[0], self.estimatedcords[1])
         rads = atan2(distx, disty)
         rads %= 2*pi
         degs = ceil(degrees(rads))
-        self.speedx = sin(rads) * self.speed
-        self.speedy = cos(rads) * self.speed
+        self.speedx = sin(rads) * speed
+        self.speedy = cos(rads) * speed
 
         if degs <= 180:
             self.dir = 'r'
