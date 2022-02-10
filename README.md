@@ -1,7 +1,7 @@
-#Your Own pet for the RasperyPi
+# Your Own pet for the RasperyPi
 ![Previes](preview.jpg)
 
-##About
+## About
 
 This Project is almost older than me. It was a fun little project, that I've done for school
 It is simply a cute little Nemo swimming around your raspberry. 
@@ -11,7 +11,7 @@ It is simply a cute little Nemo swimming around your raspberry.
 Dont expect much. I wasn't well experienced in Python at that time. :/
 
 
-##Requirements:
+## Requirements:
 
 ```bash
 pip install pygame
